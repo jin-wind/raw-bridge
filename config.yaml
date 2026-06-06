@@ -1,0 +1,27 @@
+# raw-bridge 代理配置
+proxy:
+  listen_host: "127.0.0.1"
+  listen_port: 8080
+  # 強制將所有請求轉發至此目標
+  target_base_url: "https://new.sharedchat.cc"
+
+headers:
+  # 注入官方客戶端的數位指紋
+  inject:
+    "User-Agent": "Codex Desktop/0.137.0-alpha.4 (Windows 10.0.26200; x86_64) unknown (Codex Desktop; 26.602.40724)"
+    "originator": "Codex Desktop"
+    "Authorization": "Bearer sk-"
+    "baggage": "sentry-environment=prod,sentry-release=codex%4026.602.40724,sentry-public_key=6719eaa18601933a26ac21499dcaba2f,sentry-trace_id=00000000000000000000000000000000,sentry-org_id=33249,sentry-sampled=false"
+    "Accept": "application/json"
+
+  # 強制覆蓋，確保我們偽造的身份不會被覆蓋
+  override_original: true
+
+  # 為了減少被偵測的風險，我們可以精簡傳遞的 Header，避免暴露過多資訊
+  passthrough_whitelist: ["Content-Type", "Content-Length"]
+
+logging:
+  level: "INFO"
+  log_file: "logs/proxy.log"
+  log_request_body: true
+  log_response_body: true
