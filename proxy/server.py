@@ -1,6 +1,7 @@
 """aiohttp reverse proxy entry point for raw-bridge.
 
-Uses curl_cffi with browser TLS impersonation for clean transparent forwarding.
+Uses curl_cffi with Chrome TLS impersonation + HTTP/2 for clean transparent forwarding.
+No urllib, http.client, requests, or httpx — only curl_cffi.
 """
 
 from __future__ import annotations
@@ -12,7 +13,8 @@ from typing import Any
 
 import yaml
 from aiohttp import web
-from curl_cffi import requests as cffi_requests
+from curl_cffi import CurlHttpVersion
+from curl_cffi.requests import Session
 
 from .logger import TrafficLogger
 from .middleware import HeaderInjector
@@ -26,13 +28,15 @@ STRIPPED_EXACT = {"host", "x-forwarded-for", "x-forwarded-proto", "x-forwarded-h
 
 class ReverseProxy:
     """Receive local requests, normalize them, and forward them upstream
-    using curl_cffi with Chrome TLS fingerprint impersonation."""
+    using curl_cffi with Chrome TLS fingerprint + HTTP/2 impersonation."""
 
     def __init__(self, config: dict[str, Any]) -> None:
         self.config = config
         self.proxy_config = config.get("proxy", {})
         self.injector = HeaderInjector(config)
         self.traffic_logger = TrafficLogger(config)
+        # Persistent session with Chrome impersonation + HTTP/2
+        self.session = Session(impersonate="chrome120", http_version=CurlHttpVersion.V2)
 
     async def handle(self, request: web.Request) -> web.StreamResponse:
         started = time.perf_counter()
@@ -49,13 +53,12 @@ class ReverseProxy:
         )
 
         try:
-            resp = cffi_requests.request(
+            resp = self.session.request(
                 method=request.method,
                 url=target_url,
                 headers=outbound_headers,
                 data=normalized_body if normalized_body else None,
                 allow_redirects=False,
-                impersonate="chrome120",
                 timeout=self.proxy_config.get("timeout_seconds", 300),
             )
 
