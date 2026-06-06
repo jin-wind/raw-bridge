@@ -77,12 +77,23 @@ class ReverseProxy:
             ) as upstream:
                 response_body = await upstream.read()
                 response_headers = self._strip_hop_by_hop(dict(upstream.headers))
+
+                # Decompress gzip response for logging
+                log_body = response_body
+                encoding = response_headers.get("Content-Encoding", "").lower()
+                if "gzip" in encoding:
+                    import gzip
+                    try:
+                        log_body = gzip.decompress(response_body)
+                    except Exception:
+                        pass
+
                 latency_ms = (time.perf_counter() - started) * 1000
                 self.traffic_logger.log_response(
                     log_context,
                     upstream.status,
                     response_headers,
-                    response_body,
+                    log_body,
                     latency_ms,
                 )
                 return web.Response(
