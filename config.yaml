@@ -1,7 +1,7 @@
 # raw-bridge 代理配置
 proxy:
   listen_host: "127.0.0.1"
-  listen_port: 8080
+  listen_port: 8081
   # 強制將所有請求轉發至此目標
   target_base_url: "https://new.sharedchat.cc"
 
@@ -10,7 +10,7 @@ headers:
   inject:
     "User-Agent": "Codex Desktop/0.137.0-alpha.4 (Windows 10.0.26200; x86_64) unknown (Codex Desktop; 26.602.40724)"
     "originator": "Codex Desktop"
-    "Authorization": "Bearer sk-"
+    "Authorization": "Bearer sk-66514e0c5dcd11f18dcf00163e012d40"
     "baggage": "sentry-environment=prod,sentry-release=codex%4026.602.40724,sentry-public_key=6719eaa18601933a26ac21499dcaba2f,sentry-trace_id=00000000000000000000000000000000,sentry-org_id=33249,sentry-sampled=false"
     "Accept": "application/json"
 

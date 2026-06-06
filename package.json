@@ -1,0 +1,12 @@
+{
+  "name": "raw-bridge",
+  "version": "1.0.0",
+  "description": "Local reverse proxy with client fingerprint spoofing",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  }
+}
